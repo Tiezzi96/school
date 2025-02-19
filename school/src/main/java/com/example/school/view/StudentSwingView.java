@@ -14,6 +14,8 @@ import javax.swing.JTextField;
 import javax.swing.JLabel;
 import java.awt.Color;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
@@ -130,7 +132,16 @@ public class StudentSwingView extends JFrame implements StudentView {
 		txtName.setColumns(10);
 
 		AddButton = new JButton("Aggiungi");
-		AddButton.addActionListener(e -> schoolController.newStudent(new Student(txtid.getText(), txtName.getText())));
+		AddButton.addActionListener(e -> new Thread(() -> {
+			try {
+				Thread.sleep(1000);
+
+			} catch (Exception exception) {
+				// TODO: handle exception
+			}
+			schoolController.newStudent(new Student(txtid.getText(), txtName.getText()));
+
+		}).start());
 		AddButton.setEnabled(false);
 		AddButton.setName("Add Student");
 		GridBagConstraints gbc_addButton = new GridBagConstraints();
@@ -156,11 +167,14 @@ public class StudentSwingView extends JFrame implements StudentView {
 		scrollPane.setViewportView(listStudents);
 
 		delButton = new JButton("Rimuovi Selezionati");
-		delButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				schoolController.deleteStudent(listStudents.getSelectedValue());
+		delButton.addActionListener(e -> new Thread(() -> {
+			try {
+				Thread.sleep(1000);
+			} catch (Exception e1) {
+				// TODO: handle exception
 			}
-		});
+			schoolController.deleteStudent(listStudents.getSelectedValue());
+		}).start());
 		delButton.setEnabled(false);
 		delButton.setName("Rimuovi Selezionati");
 		GridBagConstraints gbc_delButton = new GridBagConstraints();
@@ -194,23 +208,27 @@ public class StudentSwingView extends JFrame implements StudentView {
 	@Override
 	public void showError(String message, Student student) {
 		// TODO Auto-generated method stub
-		errorLabel.setText(message + ": " + student.getId());
+		SwingUtilities.invokeLater(() -> errorLabel.setText(message + ": " + student.getId()));
 
 	}
 
 	@Override
 	public void studentAdded(Student student) {
 		// TODO Auto-generated method stub
-		listStudentsModel.addElement(student);
-		resetErrorLabel();
+		SwingUtilities.invokeLater(() -> {
+			listStudentsModel.addElement(student);
 
+			resetErrorLabel();
+		});
 	}
 
 	@Override
 	public void studentRemoved(Student student) {
 		// TODO Auto-generated method stub
-		listStudentsModel.removeElement(student);
-		resetErrorLabel();
+		SwingUtilities.invokeLater(() -> {
+			listStudentsModel.removeElement(student);
+			resetErrorLabel();
+					});
 
 	}
 
@@ -221,6 +239,6 @@ public class StudentSwingView extends JFrame implements StudentView {
 	public void setSchoolController(SchoolController schoolController) {
 		// TODO Auto-generated method stub
 		this.schoolController = schoolController;
-		
+
 	}
 }

@@ -19,7 +19,7 @@ public class SchoolController {
 		studentView.showAllStudents(studentRepository.findall());
 	}
 
-	public void newStudent(Student student) {
+	public synchronized void newStudent(Student student) {
 		Student existingStudent = studentRepository.findById(student.getId());
 		if (existingStudent != null) {
 			System.out.println(": "+existingStudent);

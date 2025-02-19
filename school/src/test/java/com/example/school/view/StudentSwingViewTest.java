@@ -19,6 +19,7 @@ import org.mockito.MockitoAnnotations;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
 import com.example.school.controller.SchoolController;
@@ -27,6 +28,7 @@ import com.example.school.model.Student;
 @RunWith(GUITestRunner.class)
 public class StudentSwingViewTest extends AssertJSwingJUnitTestCase {
 
+	public static final int TIMEOUT = 5000;
 	private StudentSwingView studentSwingView;
 	private FrameFixture windows;
 	@Mock
@@ -44,7 +46,7 @@ public class StudentSwingViewTest extends AssertJSwingJUnitTestCase {
 		windows = new FrameFixture(robot(), studentSwingView);
 		windows.show();
 	}
-	
+
 	@Override
 	protected void onTearDown() throws Exception {
 		// TODO Auto-generated method stub
@@ -114,7 +116,9 @@ public class StudentSwingViewTest extends AssertJSwingJUnitTestCase {
 	@Test
 	public void testShowErrorShouldShowTheMessageInTheErrorLabel() {
 		Student student = new Student("1", "test");
-		GuiActionRunner.execute(() -> studentSwingView.showError("messaggio di errore", student));
+		// GuiActionRunner.execute(() -> studentSwingView.showError("messaggio di
+		// errore", student));
+		studentSwingView.showError("messaggio di errore", student);
 		windows.label(JLabelMatcher.withName("errorMessageLabel"))
 				.requireText("messaggio di errore: " + student.getId());
 	}
@@ -122,7 +126,9 @@ public class StudentSwingViewTest extends AssertJSwingJUnitTestCase {
 	@Test
 	public void testStudentAddedShouldAddTheStudentToTheListAndResetTheErrorLabel() {
 		Student student = new Student("1", "test1");
-		GuiActionRunner.execute(() -> studentSwingView.studentAdded(new Student("1", "test1")));
+		// GuiActionRunner.execute(() -> studentSwingView.studentAdded(new Student("1",
+		// "test1")));
+		studentSwingView.studentAdded(new Student("1", "test1"));
 		String[] listContents = windows.list().contents();
 		assertThat(listContents).containsExactly(student.toString());
 		windows.label("errorMessageLabel").requireText(" ");
@@ -132,29 +138,30 @@ public class StudentSwingViewTest extends AssertJSwingJUnitTestCase {
 	public void testStudentRemovedShouldRemoveTheStudentFromTheListAndResetTheErrorLabel() {
 		Student student1 = new Student("1", "test1");
 		Student student2 = new Student("2", "test2");
-		// we don't use studentAddded method because we can't use other method of the class under test
+		// we don't use studentAddded method because we can't use other method of the
+		// class under test
 		GuiActionRunner.execute(() -> {
 			DefaultListModel<Student> listStudentsModel = studentSwingView.getListStudentsModel();
 			listStudentsModel.addElement(student1);
 			listStudentsModel.addElement(student2);
 		});
 		GuiActionRunner.execute(() -> studentSwingView.studentRemoved(new Student("1", "test1")));
-		String [] listContents = windows.list("Student List").contents();
+		String[] listContents = windows.list("Student List").contents();
 		assertThat(listContents).containsExactly(student2.toString());
 		windows.label("errorMessageLabel").requireText(" ");
 
 	}
-	
+
 	@Test
-	public void testAddButtonShouldDelegetToSchoolControllerNewStudent() {
+	public void testAddButtonShouldDelegateToSchoolControllerNewStudent() {
 		Student student = new Student("1", "test1");
 		windows.textBox("idTextBox").enterText("1");
 		windows.textBox("nameTextBox").enterText("test1");
 		windows.button(JButtonMatcher.withName("Add Student")).click();
-		verify(schoolController).newStudent(student);
-		
+		verify(schoolController, timeout(TIMEOUT)).newStudent(student);
+
 	}
-	
+
 	@Test
 	public void testDeleteButtonShouldDelegateToSchoolControllerDeleteStudent() {
 		Student student1 = new Student("1", "test1");
@@ -166,7 +173,7 @@ public class StudentSwingViewTest extends AssertJSwingJUnitTestCase {
 		});
 		windows.list("Student List").selectItem(0);
 		windows.button(JButtonMatcher.withText("Rimuovi Selezionati")).click();
-		verify(schoolController).deleteStudent(student1);
+		verify(schoolController, timeout(TIMEOUT)).deleteStudent(student1);
 
 	}
 
